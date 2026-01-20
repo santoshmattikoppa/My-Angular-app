@@ -53,7 +53,7 @@ jobs:
           args: >
             -Dsonar.projectKey=My-Angular-app-dev
             -Dsonar.projectName=My-Angular-app-dev
-            -Dsonar.organization=YOUR_SONAR_ORG
+            -Dsonar.organization=santoshmattikoppa
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
       # 8️⃣ Configure git identity
