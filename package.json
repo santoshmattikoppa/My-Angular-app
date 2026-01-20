@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "deploy": "gh-pages -d dist/my-angular-app/browser",
+     "deploy": "gh-pages -d dist/my-angular-app/browser -r https://x-access-token:${GITHUB_TOKEN}@github.com/santoshmattikoppa/My-Angular-app.git",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:my-angular-app": "node dist/my-angular-app/server/server.mjs"

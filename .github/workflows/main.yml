@@ -1,38 +1,31 @@
-name: Angular CI & Deploy
+name: Deploy Angular App
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
+
+permissions:
+  contents: write
 
 jobs:
-  build-test-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 18
 
       - name: Install dependencies
-        run: npm ci
-
-      # ❌ Angular 21 uses Vitest – ng test flags cause failure in CI
-      # ✅ Skip tests OR add Vitest browser deps later
-      # - name: Run tests
-      #   run: npm run test
+        run: npm install
 
       - name: Build Angular app
         run: npm run build
-
-      - name: Configure Git
-        run: |
-          git config --global user.name "santoshmattikoppa"
-          git config --global user.email "santoshmattikoppa@gmail.com"
 
       - name: Deploy to GitHub Pages
         run: npm run deploy
