@@ -1,39 +1,33 @@
-name: Angular CI Pipeline
+name: Angular CI & Deploy
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
-  build:
+  build-test-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Setup Node.js (Angular 21 compatible)
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          cache: 'npm'
 
-      # Step 3: Install correct npm version
-      - name: Install npm 11.6.2
-        run: npm install -g npm@11.6.2
-
-      # Step 4: Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      # Step 5: Build Angular app
-      - name: Build Angular application
+      - name: Run tests
+        run: npm run test -- --watch=false
+
+      - name: Build app
         run: npm run build
 
-      # Step 6: Run tests
-      - name: Run unit tests
-        run: npm run test -- --watch=false
+      - name: Deploy to GitHub Pages
+        run: npm run deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
