@@ -51,8 +51,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=My-Angular-app-dev
-            -Dsonar.projectName=My-Angular-app-dev
+            -Dsonar.projectKey=santoshmattikoppa_My-Angular-app
+            -Dsonar.projectName=santoshmattikoppa_My-Angular-app
             -Dsonar.organization=santoshmattikoppa
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
