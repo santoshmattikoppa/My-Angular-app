@@ -3,6 +3,8 @@ name: Angular DEV CI & Deploy
 on:
   push:
     branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
 
 permissions:
   contents: write
@@ -12,29 +14,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # IMPORTANT for SonarQube
 
+      # 2️⃣ Setup Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm ci
 
+      # 4️⃣ Run tests with coverage (Sonar needs coverage)
+      - name: Run tests with coverage
+        run: npm run test -- --watch=false --code-coverage || true
+
+      # 5️⃣ Build DEV app
       - name: Build DEV app
         run: npm run build:dev
 
+      # 6️⃣ Add 404 fallback for SPA routing
+      - name: Add 404 fallback for SPA routing
+        run: cp dist/my-angular-app/browser/index.html dist/my-angular-app/browser/404.html
+
+      # 7️⃣ SonarQube / SonarCloud Scan
+      - name: SonarQube Scan (DEV)
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=My-Angular-app-dev
+            -Dsonar.projectName=My-Angular-app-dev
+            -Dsonar.organization=YOUR_SONAR_ORG
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+      # 8️⃣ Configure git identity
       - name: Configure git identity
         run: |
           git config --global user.name "santoshmattikoppa"
           git config --global user.email "santoshmattikoppa@gmail.com"
-  
-      - name: Add 404 fallback for SPA routing
-        run: cp dist/my-angular-app/browser/index.html dist/my-angular-app/browser/404.html
 
+      # 9️⃣ Deploy DEV to GitHub Pages
       - name: Deploy DEV to GitHub Pages
         run: |
           npx gh-pages \
@@ -43,4 +71,3 @@ jobs:
             -r https://x-access-token:${GITHUB_TOKEN}@github.com/santoshmattikoppa/My-Angular-app.git
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
