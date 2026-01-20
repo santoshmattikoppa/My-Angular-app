@@ -34,6 +34,9 @@ jobs:
         run: |
           git config --global user.name "santoshmattikoppa"
           git config --global user.email "santoshmattikoppa@gmail.com"
+          
+      - name: Add 404 fallback for SPA routing
+        run: cp dist/my-angular-app/browser/index.html dist/my-angular-app/browser/404.html
 
       - name: Deploy PROD to GitHub Pages
         run: |
