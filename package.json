@@ -4,8 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-     "deploy": "gh-pages -d dist/my-angular-app/browser -r https://x-access-token:${GITHUB_TOKEN}@github.com/santoshmattikoppa/My-Angular-app.git",
+  "build:dev": "ng build --configuration=development --base-href /My-Angular-app/dev/",
+  "build:prod": "ng build --configuration=production --base-href /My-Angular-app/",
+  "deploy:dev": "gh-pages -d dist/my-angular-app/browser -b gh-pages-dev",
+  "deploy:prod": "gh-pages -d dist/my-angular-app/browser",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:my-angular-app": "node dist/my-angular-app/server/server.mjs"
