@@ -1,4 +1,4 @@
-name: Angular DEV CI & Deploy
+name: Angular DEV CI & Deploy to S3
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: ["dev"]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build-deploy-dev:
@@ -17,10 +17,8 @@ jobs:
       # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0   # IMPORTANT for SonarQube
 
-      # 2️⃣ Setup Node
+      # 2️⃣ Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -31,43 +29,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 4️⃣ Run tests with coverage (Sonar needs coverage)
-      - name: Run tests with coverage
-        run: npm run test -- --watch=false --code-coverage || true
-
-      # 5️⃣ Build DEV app
+      # 4️⃣ Build DEV app
       - name: Build DEV app
         run: npm run build:dev
 
-      # 6️⃣ Add 404 fallback for SPA routing
-      - name: Add 404 fallback for SPA routing
+      # 5️⃣ Add SPA fallback
+      - name: Add 404 fallback
         run: cp dist/my-angular-app/browser/index.html dist/my-angular-app/browser/404.html
 
-      # 7️⃣ SonarQube / SonarCloud Scan
-      - name: SonarQube Scan (DEV)
-        uses: SonarSource/sonarcloud-github-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # 6️⃣ Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          args: >
-            -Dsonar.projectKey=santoshmattikoppa_My-Angular-app
-            -Dsonar.projectName=santoshmattikoppa_My-Angular-app
-            -Dsonar.organization=santoshmattikoppa
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
 
-      # 8️⃣ Configure git identity
-      - name: Configure git identity
+      # 7️⃣ Deploy to S3
+      - name: Deploy to S3 (DEV)
         run: |
-          git config --global user.name "santoshmattikoppa"
-          git config --global user.email "santoshmattikoppa@gmail.com"
-
-      # 9️⃣ Deploy DEV to GitHub Pages
-      - name: Deploy DEV to GitHub Pages
-        run: |
-          npx gh-pages \
-            -d dist/my-angular-app/browser \
-            -b gh-pages-dev \
-            -r https://x-access-token:${GITHUB_TOKEN}@github.com/santoshmattikoppa/My-Angular-app.git
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          aws s3 sync dist/my-angular-app/browser s3://demo-app-angular-new --delete
